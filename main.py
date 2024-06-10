@@ -11,11 +11,9 @@ Attributes:
 import sys
 import json
 from typing import List
-
 from PyQt6 import QtWidgets
-
-from app_config import CANTelemetryAppConfig
 from gui import AppWindow, MainWindow
+from app_config import CANTelemetryAppConfig
 
 
 def run_app(app_dir: str):
@@ -25,15 +23,23 @@ def run_app(app_dir: str):
         app_dir (str): Directory containing the app's configuration files.
     """
     # Load configuration settings from the app directory.
-    config = CANTelemetryAppConfig.init_from_dir(app_dir)
+    config_file = f"{app_dir}/config.json"
+    try:
+        with open(config_file, 'r') as file:
+            content = file.read()
+            print(f"Contents of {config_file}:\n{content}")  # Print the contents for debugging
+            config = json.loads(content)
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error loading app config: {e}")
+        return
 
-    # Initialize telemetry backend application based on loaded configuration.
-    telemetry = config.init_app()
-    telemetry.start()
+    gui_file = f"{app_dir}/{config['gui']}"
+    graph_config_file = config_file
 
     # Initialize and display the graphical user interface (GUI) for the selected app.
     gui = QtWidgets.QApplication(sys.argv)
-    app_window = AppWindow(config.gui_ui)
+    app_window = AppWindow(gui_file, app_dir)
+    app_window.load_graph_config(graph_config_file)
     app_window.show()
 
     try:
@@ -41,14 +47,9 @@ def run_app(app_dir: str):
         gui.exec()
     except KeyboardInterrupt:  # Handle GUI closure by user.
         pass
-    finally:
-        # Stop the telemetry backend application and clean up resources.
-        telemetry.stop()
-        telemetry.join()
 
 
 if __name__ == "__main__":
-
     start = "start.json"
     # Open the file and read its contents
     try:

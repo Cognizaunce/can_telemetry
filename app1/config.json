@@ -1,5 +1,13 @@
 {
-    "gui": "example.ui",
-    "app": "example.json",
-    "dbc": "example.dbc"
+  "app": "example.json",
+  "dbc": "example.dbc",
+  "gui": "example.ui",
+  "plots": {
+    "graph1": {
+      "title": "Salary vs Age",
+      "x-axis": "Age",
+      "y-axis": "Salary",
+      "data": "graph1.csv"
+    }
+  }
 }
